@@ -2,6 +2,25 @@ use std::io;
 use std::cmp;
 use std::time;
 use time::Instant;
+use std::fs;
+use rand::Rng;
+
+fn readfromfile() -> String {
+    let words = fs::read_to_string("words.txt").expect("");
+    return words;
+}
+
+fn generatephrase() -> String {
+    let words = readfromfile();
+    let words: Vec<_> = words.split("\n").collect();
+    let mut rng = rand::thread_rng();
+    let wordslen = words.len() - 1;
+    let mut phrase = String::new();
+    for _ in 0..10 {
+        phrase = phrase + words[rng.gen_range(0..wordslen)] + " ";
+    }
+    return phrase; 
+}
 
 fn scoreinput(phrase: &str, input: &str) -> f32 {
     let mut correct: i32 = 0;
@@ -17,7 +36,7 @@ fn scoreinput(phrase: &str, input: &str) -> f32 {
 }
 
 fn main() {
-    let phrase: &str = "the quick brown fox jumps over the lazy dog";
+    let phrase: &str = &generatephrase();
     let mut input = String::new();
     let start_t = Instant::now();
     println!("{}", phrase);
