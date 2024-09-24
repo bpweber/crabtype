@@ -1,8 +1,9 @@
 use std::io;
 use std::cmp;
 use std::time;
-use time::Instant;
 use std::fs;
+use std::env;
+use time::Instant;
 use rand::Rng;
 
 fn readfromfile() -> String {
@@ -10,13 +11,13 @@ fn readfromfile() -> String {
     return words;
 }
 
-fn generatephrase() -> String {
+fn generatephrase(diff: i32, plen: i32) -> String {
     let words = readfromfile();
     let words: Vec<_> = words.split("\n").collect();
     let mut rng = rand::thread_rng();
-    let wordslen = words.len() - 1;
+    let wordslen = ((diff as f32 / 10.0) * words.len() as f32) as usize - 1;
     let mut phrase = String::new();
-    for _ in 0..10 {
+    for _ in 0..plen {
         phrase = phrase + words[rng.gen_range(0..wordslen)] + " ";
     }
     return phrase; 
@@ -36,9 +37,13 @@ fn scoreinput(phrase: &str, input: &str) -> f32 {
 }
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    let diff: i32 = args[1].parse().unwrap();
+    let plen: i32 = args[2].parse().unwrap();
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+    println!("{0} {1}", diff, plen);
     loop {
-        let phrase: &str = &generatephrase();
+        let phrase: &str = &generatephrase(diff, plen);
         let mut input = String::new();
         let start_t = Instant::now();
         println!("{}", phrase);
