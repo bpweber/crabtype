@@ -36,15 +36,18 @@ fn scoreinput(phrase: &str, input: &str) -> f32 {
 }
 
 fn main() {
-    let phrase: &str = &generatephrase();
-    let mut input = String::new();
-    let start_t = Instant::now();
-    println!("{}", phrase);
-    io::stdin().read_line(&mut input).expect("");
-    let elapsed_t = start_t.elapsed().as_millis();
-    let input: &str = input.as_str().trim();
-    let wpm_raw = (input.len() as f32 / 5.0) / (elapsed_t as f32 / 60000.0);
-    let accuracy = scoreinput(phrase, input);
-    println!("{}% | {}wpm | {}raw", (100.0 * accuracy) as i32, (accuracy * wpm_raw) as i32, wpm_raw as i32);
+    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+    loop {
+        let phrase: &str = &generatephrase();
+        let mut input = String::new();
+        let start_t = Instant::now();
+        println!("{}", phrase);
+        io::stdin().read_line(&mut input).expect("");
+        let elapsed_t = start_t.elapsed().as_millis();
+        let input: &str = input.as_str().trim();
+        let wpm_raw = (input.len() as f32 / 5.0) / (elapsed_t as f32 / 60000.0);
+        let accuracy = scoreinput(phrase, input);
+        println!("{}% | {}wpm | {}raw\n", (100.0 * accuracy) as i32, (accuracy * wpm_raw) as i32, wpm_raw as i32);
+    }
 }
 
