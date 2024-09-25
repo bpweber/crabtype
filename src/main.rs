@@ -36,10 +36,34 @@ fn scoreinput(phrase: &str, input: &str) -> f32 {
     return (correct as f32) / (input_chars.len() as f32)
 }
 
+fn parseargs(args: Vec<String>) -> Vec<i32> {
+    let mut diff: i32 = 10;
+    let mut plen: i32 = 15;
+    if args.len() > 1 {
+        diff = match args[1].parse() {
+            Ok(n) => cmp::min(n, diff),
+            Err(_) => {
+                println!("Illegal argument!");
+                diff
+            }, 
+        };
+    }
+    if args.len() > 2 {
+        plen = match args[2].parse() {
+            Ok(n) => cmp::min(n, plen),
+            Err(_) => {
+                println!("Illegal argument!");
+                plen
+            }, 
+        };
+    }
+    return vec![diff, plen]
+}
+
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let diff: i32 = args[1].parse().unwrap();
-    let plen: i32 = args[2].parse().unwrap();
+    let args: Vec<i32> = parseargs(env::args().collect());
+    let diff = args[0];
+    let plen = args[1];
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
     println!("{0} {1}", diff, plen);
     loop {
