@@ -60,23 +60,48 @@ fn parseargs(args: Vec<String>) -> Vec<i32> {
     return vec![diff, plen]
 }
 
+fn statstring(acc: f32, wpm: f32) -> String {
+    return format!("{}% | {}wpm | {}raw\n", (100.0 * acc) as i32, (acc * wpm) as i32, wpm as i32);
+}
+
 fn main() {
     let args: Vec<i32> = parseargs(env::args().collect());
     let diff = args[0];
     let plen = args[1];
+    let mut avg_acc = 0.0;
+    let mut avg_wpm = 0.0;
+    let mut ctr = 0.0;
+    let mut hist: Vec<String> = Vec::new();
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
     println!("{0} {1}", diff, plen);
     loop {
+        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
         let phrase: &str = &generatephrase(diff, plen);
         let mut input = String::new();
         let start_t = Instant::now();
-        println!("{}", phrase);
+        println!("{}⏎", phrase);
         io::stdin().read_line(&mut input).expect("");
         let elapsed_t = start_t.elapsed().as_millis();
         let input: &str = input.as_str().trim();
+        if input == ":q" {
+            print!("{esc}[F{esc}[K", esc = 27 as char);
+            print!("{esc}[F{esc}[K", esc = 27 as char);
+            for line in hist {
+                println!("{}", line);
+            }
+            println!("[Session Average]");
+            println!("{}", statstring(avg_acc, avg_wpm));
+            break;
+        }
         let wpm_raw = (input.len() as f32 / 5.0) / (elapsed_t as f32 / 60000.0);
+        avg_wpm = (ctr * avg_wpm + wpm_raw) / (ctr + 1.0);
         let accuracy = scoreinput(phrase, input);
-        println!("{}% | {}wpm | {}raw\n", (100.0 * accuracy) as i32, (accuracy * wpm_raw) as i32, wpm_raw as i32);
+        avg_acc = (ctr * avg_acc + accuracy) / (ctr + 1.0);
+        println!("{}", statstring(accuracy, wpm_raw));
+        hist.push(format!("{}⏎", phrase));
+        hist.push(input.to_string());
+        hist.push(statstring(accuracy, wpm_raw));
+        ctr += 1.0;
     }
 }
 
